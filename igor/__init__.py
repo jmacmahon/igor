@@ -8,10 +8,7 @@ import os
 
 from igor.irc.connection import Connection
 from igor.reactor import Reactor
-
-class Plugin(object):
-    def __call__(self, event):
-        print(event)
+from igor.plugins import TestPlugin
 
 def main():
-    Reactor([Connection("irc.aberwiki.org", 6667)], [Plugin()]).go()
+    Reactor([Connection("irc.aberwiki.org", 6667)], [TestPlugin()]).go()
