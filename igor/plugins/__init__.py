@@ -4,6 +4,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import functools
 import inspect
+import re
 import sys
 import traceback
 
@@ -44,13 +45,29 @@ def command(function):
             return function(self, message)
     return listener(wrapper, Privmsg)
 
+def trigger(pattern, flags=0):
+    regex = re.compile(pattern, flags)
+    def create_trigger(function):
+        @functools.wraps(function)
+        def wrapper(self, message):
+            result = regex.match(message.trailing)
+            if result is not None:
+                return function(self, message, result)
+        return listener(wrapper, Privmsg)
+    return create_trigger
+
 class TestPlugin(Plugin):
     @listener
     def test_all(self, message):
         """Receives all messages"""
-        print(message)
+        print("Message received")
 
     @command
-    def test_command(self, message):
+    def test(self, message):
         """Receives Privmsg messages that start with :test_command"""
-        print("Command received", message.trailing)
+        print("Command")
+
+    @trigger(".*test.*")
+    def test_regex(self, message, result):
+        """Receives Privmsg messages match a regex"""
+        print("Trigger")

@@ -14,5 +14,7 @@ from igor.plugins import TestPlugin
 def main():
     Reactor([Connection("irc.aberwiki.org", 6667)], [TestPlugin()]).go()
 
-def main():
-    TestPlugin()(Message.parse(":npc!npc@borntyping.co.uk PRIVMSG #69 ::test some arguments"))
+def test():
+    plugin = TestPlugin()
+    line = ":npc!npc@borntyping.co.uk PRIVMSG #69 ::test some arguments"
+    plugin(Message.parse(line))
