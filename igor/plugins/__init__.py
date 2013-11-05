@@ -9,93 +9,48 @@ import traceback
 
 from igor.irc.messages import Message, Privmsg, MOTD
 
-class BoundListener(object):
-    """Binds a Listener instance to a Plugin instance"""
-
-    def __init__(self, listener, instance):
-        self.listener = listener
-        self.instance = instance
-
-    def __call__(self, *args, **kwargs):
-        return self.listener(self.instance, *args, **kwargs)
-
-class Listener(object):
-    """Wraps a function, filtering messages with a predicate"""
-
-    def __init__(self, function, predicate=None):
-        self.function = function
-        self.predicate = predicate
-
-    def __get__(self, instance, owner):
-        return BoundListener(self, instance)
-
-    def __call__(self, instance, message):
-        if self.predicate is None or self.predicate(message):
-            return self.function(instance, message)
-
-class Command(Listener):
-    COMMAND_CHARACTER = ':'
-
-    def __init__(self, function, command):
-        self.function = function
-        self.command = command
-
-    def __call__(self, instance, message):
-        if isinstance(message, Privmsg) and message.trailing.startswith(self._prefix):
-            return self.function(instance, message, self._arguments(message))
-
-    @property
-    def _prefix(self):
-        return self.COMMAND_CHARACTER + self.command
-
-    def _arguments(self, message):
-        arguments = message.trailing.split(' ', 1)
-        return arguments[1] if arguments[1] else ''
-
-class ListenerDecorator(object):
-    def __init__(self, listener_class, ):
-        self.listener_class = listener_class
-
-    def __call__(self, *args, **kwargs):
-        """Returns a decorator function that will create a listener instance"""
-
-        # If the only argument passed is a function, create a Listener
-        if len(args) == 1 and callable(args[0]) and not kwargs:
-            return self.listener_class(function=args[0])
-
-        # This decorator will create a Listener with the arguments we already have
-        def create_listener(function):
-            return self.listener_class(function, *args, **kwargs)
-
-        return create_listener
-
-listener = ListenerDecorator(Listener)
-command = ListenerDecorator(Command)
-
 class Plugin(object):
-    def __call__(self, message):
-        for name, listener in inspect.getmembers(self, self.__is_listener):
+    def _is_listener(self, obj):
+        """Checks if the object has a receives attribute and is callable"""
+        return hasattr(obj, 'receives') and callable(obj)
+
+    def _call_listener(self, listener, message):
+        """Calls a listener, making sure exceptions are handled"""
+        if isinstance(message, listener.receives):
             try:
                 listener(message)
             except Exception as exception:
                 print("Listener {} failed to run".format(name))
-                self.__log_exception(exception)        
+                print(traceback.format_exc(exception), file=sys.stderr)
 
-    def __is_listener(self, object):
-        return isinstance(object, BoundListener)
+    def _receive_message(self, message):
+        """Dispatches a message to all methods that say they will receive it"""
+        for name, listener in inspect.getmembers(self, self._is_listener):
+            self._call_listener(listener, message)
 
-    def __log_exception(self, exception):
-        print(traceback.format_exc(exception), file=sys.stderr)
+    def __call__(self, *args, **kwargs):
+        self._receive_message(*args, **kwargs)
+
+def listener(function, message_class=Message):
+    """Sets function.receives, and in the future other listener metadata"""
+    function.receives = message_class
+    return function
+
+def command(function):
+    """Returns a listener, and checks for the command"""
+    @functools.wraps(function)
+    def wrapper(self, message):
+        if message.trailing.startswith(':' + function.__name__):
+            return function(self, message)
+    return listener(wrapper, Privmsg)
 
 class TestPlugin(Plugin):
-    @listener(predicate=lambda message: isinstance(message, MOTD))
-    def test_motd(self, message):
-        print(message.text)
-
     @listener
     def test_all(self, message):
+        """Receives all messages"""
         print(message)
 
-    @command("test")
-    def test_command(self, message, arguments):
-        print("Called command test with", repr(arguments))
+    @command
+    def test_command(self, message):
+        """Receives Privmsg messages that start with :test_command"""
+        print("Command received", message.trailing)
