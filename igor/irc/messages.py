@@ -8,18 +8,14 @@ class Message(object):
     classes = dict()
 
     @classmethod
-    def _register(cls, name, obj):
-        cls.classes[str(name).lower()] = obj
-
-    @classmethod
     def register(cls, obj):
-        cls._register(obj.__name__, obj)
+        cls.classes[obj.__name__.lower()] = obj
         return obj
 
     @classmethod
     def register_numeric(cls, code):
         def decorator(obj):
-            cls._register(code, obj)
+            cls.classes[str(code).zfill(3)] = obj
             return obj
         return decorator
 
@@ -83,7 +79,8 @@ class ChannelMessage(Message):
             self.channel = self.receiver
             self.private = False
 
-"""4.1 Connection Registration"""
+# RFC 1459: Internet Relay Chat Protocol
+# 4.1 Connection Registration
 
 @Message.register
 class Quit(Message):
@@ -105,21 +102,21 @@ class Part(Message):
 class Topic(Message):
     channel = property(lambda self: self.parameters[0])
 
-"""4.4 Sending messages"""
+# 4.4 Sending messages
 
 @Message.register
 class Privmsg(ChannelMessage):
     text = property(lambda self: self.trailing)
     
     def reply(self, message):
-        pass
+        self.connection.privmsg(self.channel, message)
 
 @Message.register
 class Notice(ChannelMessage):
     def reply(self):
         raise Exception("Don't reply to IRC NOTICE messages")
 
-"""6.2 Command responses"""
+# 6.2 Command responses
 
 @Message.register_numeric(331)
 def no_topic(**kwargs):
@@ -152,3 +149,10 @@ class MOTD(Message):
     def init(self):
         """Strip the trailing newline from the MOTD"""
         self.connection.motd = self.connection.motd[:-1]
+
+# RFC 2812 - Internet Relay Chat: Client Protocol
+# 5.1 Command responses
+
+@Message.register_numeric(001)
+class RPL_WELCOME(Message):
+    pass

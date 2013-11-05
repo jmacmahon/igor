@@ -12,7 +12,17 @@ from igor.utils import quick_repr
 class Disconnected(Exception):
     pass
 
-class Connection(object):
+class ExceptionAttribute(object):
+    """An attribute that raises an exception when accessed"""
+
+    def __init__(self, message, exception_class=AttributeError):
+        self.message = message
+        self.exception_class = exception_class
+
+    def __get__(self, instance, owner):
+        raise self.exception_class(self.message) 
+
+class BaseConnection(object):
     ENCODING = 'utf-8'
     MESSAGE_CLASS = Message
 
@@ -22,9 +32,6 @@ class Connection(object):
     else:
         BINARY_TYPE = str
         NEWLINE = str("\r\n")
-
-    fd = None
-    socket = None
 
     def __init__(self, host, port=None, username=None, password=None):
         self.host = host
@@ -41,6 +48,9 @@ class Connection(object):
             'password': self.password,
         })
 
+    fd = ExceptionAttribute("File descriptor has not been set")
+    socket = ExceptionAttribute("Socket has not been created")
+
     def connect(self):
         self._buffer = self.BINARY_TYPE()
 
@@ -49,8 +59,6 @@ class Connection(object):
         self.socket.connect((self.host, self.port))
 
         self.fd = self.socket.fileno()
-
-        print("Connected to {0}:{1}".format(self.host, self.port))
 
         self.write('NICK :{username}'.format(username=self.username))
         self.write('USER igor * * :Igor - https://github.com/borntyping/igor')
@@ -100,3 +108,37 @@ class Connection(object):
             self._try(self.socket.shutdown, socket.SHUT_RDWR)
             self._try(self.socket.close)
             del self.socket
+
+class Connection(BaseConnection):
+    """Client to server messages"""
+
+    # 4.1 - Connection Registration
+
+    def nick(self, nick):
+        self.write('NICK', [nick])
+
+    def user(self, user, real):
+        self.write('USER', [user, "''", "''"], real)
+
+    def quit(self, message):
+        self.write('QUIT', [], message)
+
+    # 4.2 - Channel Operations
+
+    def join(self, channel, key = None):
+        self.write('JOIN', [channel, key] if key else [channel])
+
+    def part(self, channel):
+        self.write('PART', channel)
+
+    # 4.4 Sending messages
+
+    def _message(self, command, to, message):
+        for line in message.split("\n"):
+            self.write(command, [to], line)
+
+    def privmsg(self, to, message):
+        self._message('PRIVMSG', to, message)
+
+    def notice(self, to, message):
+        self._message('NOTICE', to, message)

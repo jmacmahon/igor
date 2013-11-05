@@ -9,12 +9,12 @@ import os
 from igor.irc.connection import Connection
 from igor.irc.messages import Message
 from igor.reactor import Reactor
-from igor.plugins import TestPlugin
+from igor.plugins.builtins import Builtins
 
 def main():
-    Reactor([Connection("irc.aberwiki.org", 6667)], [TestPlugin()]).go()
+    Reactor([Connection("irc.aberwiki.org", 6667)], [Builtins()]).go()
 
 def test():
-    plugin = TestPlugin()
-    line = ":npc!npc@borntyping.co.uk PRIVMSG #69 ::test some arguments"
-    plugin(Message.parse(line))
+    plugin = Builtins()
+    line = ":npc!npc@borntyping.co.uk PRIVMSG #69 ::say some arguments"
+    plugin(Message.parse(line, connection=Connection("irc.aberwiki.org", 6667)))
