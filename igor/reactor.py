@@ -8,13 +8,14 @@ import traceback
 
 from igor.irc.connection import Disconnected
 
+
 class Reactor(object):
     """Manages connections using select() and passes events to callbacks"""
 
     _timeout = 1000 * 60
     _input_mask = select.POLLPRI | select.POLLIN
     _error_mask = select.POLLERR | select.POLLHUP | select.POLLNVAL
-    
+
     def __init__(self, connections, callbacks):
         self.connections = connections
         self.callbacks = callbacks
@@ -36,8 +37,8 @@ class Reactor(object):
         try:
             connection.connect()
         except Exception as exception:
-            print("Connection {connection} failed to connect:\n {message}".format(
-                connection=connection, message=exception))
+            print("Connection {connection} failed to connect:\n "
+                  "{message}".format(connection=connection, message=exception))
             print(traceback.format_exc(exception), end='')
         else:
             self._descriptors[connection.fd] = connection
@@ -50,7 +51,8 @@ class Reactor(object):
         connection.disconnect(exception)
 
     def go(self):
-        """Start the context manager, loop until there a no connections left, and handle user interrupts"""
+        """Start the context manager, loop until there a no connections left
+           and handle user interrupts"""
         with self:
             while self._descriptors:
                 try:
