@@ -4,9 +4,11 @@ from __future__ import absolute_import, unicode_literals
 
 import re
 
+
 def parse_prefix(prefix):
     """Parse an IRC hostmask into a tuple"""
     return tuple(re.split('[!@]', prefix))
+
 
 def parse_line(line):
     """Parse an IRC message and return a tuple of it's components"""
@@ -30,6 +32,7 @@ def parse_line(line):
 
     return source, command, parameters, trailing
 
+
 def format_prefix(nick, user=None, host=None):
     """Format an IRC prefix (i.e. hostmask) from its components"""
     prefix = nick
@@ -38,6 +41,7 @@ def format_prefix(nick, user=None, host=None):
     if host:
         prefix += '@' + host
     return prefix
+
 
 def format_line(source, command, parameters, trailing):
     """Format an IRC message from its components"""

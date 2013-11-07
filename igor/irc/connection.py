@@ -9,8 +9,10 @@ from igor.irc.messages import Message
 from igor.irc.parser import format_line
 from igor.utils import quick_repr
 
+
 class Disconnected(Exception):
     pass
+
 
 class ExceptionAttribute(object):
     """An attribute that raises an exception when accessed"""
@@ -20,7 +22,8 @@ class ExceptionAttribute(object):
         self.exception_class = exception_class
 
     def __get__(self, instance, owner):
-        raise self.exception_class(self.message) 
+        raise self.exception_class(self.message)
+
 
 class BaseConnection(object):
     ENCODING = 'utf-8'
@@ -102,12 +105,13 @@ class BaseConnection(object):
     def disconnect(self, exception=None, message="Disconnected"):
         if exception and not message:
             message = str(exception)
-        
+
         if self.socket is not None:
             self._try(self.write, "QUIT :" + message)
             self._try(self.socket.shutdown, socket.SHUT_RDWR)
             self._try(self.socket.close)
             del self.socket
+
 
 class Connection(BaseConnection):
     """Client to server messages"""
@@ -125,7 +129,7 @@ class Connection(BaseConnection):
 
     # 4.2 - Channel Operations
 
-    def join(self, channel, key = None):
+    def join(self, channel, key=None):
         self.write('JOIN', [channel, key] if key else [channel])
 
     def part(self, channel):

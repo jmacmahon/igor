@@ -12,6 +12,7 @@ from igor.irc.messages import Message, Privmsg, MOTD
 
 __all__ = ['Plugin', 'listener', 'command', 'trigger']
 
+
 class Plugin(object):
     def _is_listener(self, obj):
         """Checks if the object has a receives attribute and is callable"""
@@ -25,19 +26,22 @@ class Plugin(object):
                     listener(message)
             except Exception as exception:
                 print("Listener '{}' from plugin '{}' failed to run.".format(
-                    name, self.__class__.__name__,                    
+                    name, self.__class__.__name__,
                 ), traceback.format_exc(exception), end='', file=sys.stderr)
+
 
 def listen(function, message_class=Message):
     """Sets function.receives, and in the future other listener metadata"""
     function.receives = message_class
     return function
 
+
 def listen_for(message_class=Message):
-    """Returns a listener that only receives messages of a certain type""" 
+    """Returns a listener that only receives messages of a certain type"""
     def create_listener(function):
         return listen(function, message_class=message_class)
     return create_listener
+
 
 def command(function):
     """Returns a listener, and checks for the command"""
@@ -48,8 +52,10 @@ def command(function):
             return function(self, message)
     return listen(wrapper, Privmsg)
 
+
 def trigger(pattern, flags=0):
     regex = re.compile(pattern, flags)
+
     def create_trigger(function):
         @functools.wraps(function)
         def wrapper(self, message):
@@ -58,6 +64,7 @@ def trigger(pattern, flags=0):
                 return function(self, message, result)
         return listen(wrapper, Privmsg)
     return create_trigger
+
 
 class TestPlugin(Plugin):
     @listen
