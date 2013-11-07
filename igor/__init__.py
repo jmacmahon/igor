@@ -18,6 +18,6 @@ def main():
 
 def test():
     plugin = Builtins()
-    line = ":npc!npc@borntyping.co.uk PRIVMSG #69 ::say some arguments"
-    plugin(Message.parse(line,
-                         connection=Connection("irc.aberwiki.org", 6667)))
+    plugin(Message.parse(
+        ":npc!npc@borntyping.co.uk PRIVMSG #69 ::say some arguments",
+        connection=Connection("irc.aberwiki.org", 6667)))

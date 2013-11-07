@@ -1,2 +1,1 @@
-"""A parser, event hierarchy and socket-based connection for
-   the IRC protocol"""
+"""IRC client library - parser, message classes and socket-based client"""

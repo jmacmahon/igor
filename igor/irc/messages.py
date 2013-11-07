@@ -81,6 +81,7 @@ class ChannelMessage(Message):
             self.channel = self.receiver
             self.private = False
 
+
 # RFC 1459: Internet Relay Chat Protocol
 # 4.1 Connection Registration
 
@@ -108,6 +109,7 @@ class Part(Message):
 class Topic(Message):
     channel = property(lambda self: self.parameters[0])
 
+
 # 4.4 Sending messages
 
 
@@ -123,6 +125,7 @@ class Privmsg(ChannelMessage):
 class Notice(ChannelMessage):
     def reply(self):
         raise Exception("Don't reply to IRC NOTICE messages")
+
 
 # 6.2 Command responses
 
@@ -163,6 +166,7 @@ class MOTD(Message):
     def init(self):
         """Strip the trailing newline from the MOTD"""
         self.connection.motd = self.connection.motd[:-1]
+
 
 # RFC 2812 - Internet Relay Chat: Client Protocol
 # 5.1 Command responses
