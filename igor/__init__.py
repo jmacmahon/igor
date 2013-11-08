@@ -13,9 +13,13 @@ from igor.irc.messages import Message
 from igor.reactor import Reactor
 from igor.plugins.builtins import Builtins
 
-parser = argparse.ArgumentParser()
+def formatter_class(*args, **kwargs):
+    kwargs['max_help_position'] = 32
+    return argparse.ArgumentDefaultsHelpFormatter(*args, **kwargs)
+
+parser = argparse.ArgumentParser(formatter_class=formatter_class)
 parser.add_argument(
-    '--config', default='igor.yaml', metavar='file',
+    '-c', '--config', default='igor.yaml', metavar='file',
     help="The configuration file to load")
 
 def main():
