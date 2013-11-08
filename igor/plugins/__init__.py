@@ -44,12 +44,15 @@ def listen_for(message_class=Message):
 
 
 def command(function):
-    """Returns a listener, and checks for the command"""
+    """
+    Returns a listener which checks if messages start with a command
+
+    Command functions should have the signature `(self, message, *argv)`
+    """
     @functools.wraps(function)
     def wrapper(self, message):
-        # TODO: pass the function the command arguments
         if message.trailing.startswith(':' + function.__name__):
-            return function(self, message)
+            return function(self, message, message.trailing.split())
     return listen(wrapper, Privmsg)
 
 
