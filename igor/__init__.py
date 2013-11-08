@@ -15,7 +15,7 @@ from igor.plugins.builtins import Builtins
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    'config', default='igor.yaml', metavar='file',
+    '--config', default='igor.yaml', metavar='file',
     help="The configuration file to load")
 
 def main():
