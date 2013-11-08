@@ -15,6 +15,17 @@ class Builtins(Plugin):
     def welcome(self, message):
         print("Connected to {c.host}:{c.port}".format(c=message.connection))
 
+    @staticmethod
+    def __arguments(message):
+        """Gets the arguments that follow a command"""
+        # TODO: Remove this and improve @command
+        if not ' ' in message.trailing: return None
+        return message.trailing.split(' ', 1)[1]
+
     @command
     def say(self, message):
-        message.reply(message.trailing.split(' ', 1)[1])
+        message.reply(self.__arguments(message))
+
+    @command
+    def quit(self, message):
+        message.connection.quit(self.__arguments(message))

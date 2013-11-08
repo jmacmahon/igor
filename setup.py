@@ -17,6 +17,8 @@ setuptools.setup(
 
     packages = setuptools.find_packages(),
 
+    install_requires = ['pyyaml'],
+
     entry_points = {
         'console_scripts': [
             'igor = igor:main'

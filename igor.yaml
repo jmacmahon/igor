@@ -1,0 +1,8 @@
+{
+    "connections": [
+        {
+            "host": "irc.aberwiki.org",
+            "autojoin": ["#igor"]
+        }
+    ]
+}

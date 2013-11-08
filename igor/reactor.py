@@ -16,6 +16,10 @@ class Reactor(object):
     _input_mask = select.POLLPRI | select.POLLIN
     _error_mask = select.POLLERR | select.POLLHUP | select.POLLNVAL
 
+    @classmethod
+    def from_config(cls, connections, plugins):
+        return cls(connections, callbacks=plugins)
+
     def __init__(self, connections, callbacks):
         self.connections = connections
         self.callbacks = callbacks
