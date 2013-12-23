@@ -6,7 +6,10 @@ from __future__ import print_function
 import select
 import traceback
 
-from igor.irc.connection import Disconnected
+import yaml
+
+from igor.irc.connection import Connection, Disconnected
+from igor.plugins.builtins import Builtins
 
 
 class Reactor(object):
@@ -15,10 +18,6 @@ class Reactor(object):
     _timeout = 1000 * 60
     _input_mask = select.POLLPRI | select.POLLIN
     _error_mask = select.POLLERR | select.POLLHUP | select.POLLNVAL
-
-    @classmethod
-    def from_config(cls, connections, plugins):
-        return cls(connections, callbacks=plugins)
 
     def __init__(self, connections, callbacks):
         self.connections = connections
@@ -82,3 +81,17 @@ class Reactor(object):
     def dispatch(self, event):
         for callback in self.callbacks:
             callback(event)
+
+
+class Igor(Reactor):
+    @classmethod
+    def from_config_file(cls, filename):
+        with open(filename, 'r') as f:
+            config = yaml.safe_load(f)
+        return cls(config)
+
+    def __init__(self, config):
+        self.config = config
+        connections = list(Connection(**c) for c in config['connections'])
+        callbacks = [Builtins()]
+        super(Igor, self).__init__(connections, callbacks)
