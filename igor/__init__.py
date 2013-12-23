@@ -7,6 +7,8 @@ import logging
 
 from igor.reactor import Igor
 
+__version__ = '1.0.0-alpha'
+
 LOG_FORMAT = '%(asctime)s %(levelname)-8s [%(name)s] %(message)s'
 
 LOG_LEVELS = {
@@ -40,6 +42,10 @@ parser.add_argument(
     '-l', '--log-level', metavar='LEVEL',
     default='INFO', choices=LOG_LEVELS.keys(),
     help="One of CRITICAL, ERROR, WARNING, INFO, DEBUG")
+parser.add_argument(
+    '-v', '--version', action='version',
+    version='Igor v{0}'.format(__version__),
+    help="Show this programs version and exit")
 
 
 def main():

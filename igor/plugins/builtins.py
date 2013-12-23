@@ -2,14 +2,16 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import igor
+import igor.utils
+
 from igor.irc.messages import RPL_WELCOME
 from igor.plugins import Plugin, listen, listen_for, command
-from igor.utils import getLogger
 
 
 class Builtins(Plugin):
     def __init__(self):
-        self.log = getLogger(self)
+        self.log = igor.utils.getLogger(self)
 
     @listen
     def log_messages(self, message):
@@ -18,6 +20,14 @@ class Builtins(Plugin):
     @listen_for(RPL_WELCOME)
     def welcome(self, message):
         self.log.info(message.trailing)
+
+    @command
+    def about(self, message, argv):
+        message.reply("https://github.com/borntyping/igor")
+
+    @command
+    def version(self, message, argv):
+        message.reply("Igor, version {0}".format(igor.__version__))
 
     @command
     def say(self, message, argv):
