@@ -61,9 +61,7 @@ class Message(object):
 
     @property
     def me(self):
-        if hasattr(self.connection, 'nick'):
-            return self.connection.nick
-        return None
+        return self.connection.name
 
 
 class ChannelMessage(Message):

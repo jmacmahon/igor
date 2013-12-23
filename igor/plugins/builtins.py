@@ -1,6 +1,6 @@
 """Builtin plugin"""
 
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from igor.irc.messages import RPL_WELCOME
 from igor.plugins import Plugin, listen, listen_for, command
@@ -8,12 +8,12 @@ from igor.plugins import Plugin, listen, listen_for, command
 
 class Builtins(Plugin):
     @listen
-    def print_messages(self, message):
-        print(message)
+    def log_messages(self, message):
+        self.log.debug(message)
 
     @listen_for(RPL_WELCOME)
     def welcome(self, message):
-        print("Connected to {c.host}:{c.port}".format(c=message.connection))
+        self.log.info("Connected to {0}".format(message.connection))
 
     @command
     def say(self, message, argv):

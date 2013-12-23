@@ -1,15 +1,14 @@
 """The core Reactor class"""
 
 from __future__ import absolute_import, unicode_literals
-from __future__ import print_function
 
 import select
-import traceback
 
 import yaml
 
-from igor.irc.connection import Connection, Disconnected
-from igor.plugins.builtins import Builtins
+import igor.irc.connection
+import igor.plugins.builtins
+import igor.utils
 
 
 class Reactor(object):
@@ -20,6 +19,9 @@ class Reactor(object):
     _error_mask = select.POLLERR | select.POLLHUP | select.POLLNVAL
 
     def __init__(self, connections, callbacks):
+        self.log = igor.utils.getLogger(self)
+        self.log.info("Igor raises from the grave!")
+
         self.connections = connections
         self.callbacks = callbacks
 
@@ -37,18 +39,18 @@ class Reactor(object):
             self.disconnect(connection)
 
     def connect(self, connection):
+        self.log.info("Connecting to {0}".format(connection))
         try:
             connection.connect()
-        except Exception as exception:
-            print("Connection {connection} failed to connect:\n "
-                  "{message}".format(connection=connection, message=exception))
-            print(traceback.format_exc(exception), end='')
+        except Exception:
+            self.log.exception("Failed to connect to {0}".format(connection))
         else:
             self._descriptors[connection.fd] = connection
             self._poll.register(connection.fd, self._input_mask)
 
     def disconnect(self, connection, exception=None):
         """Unregister a connection and tell it to disconnect"""
+        self.log.info("Disconnecting from {0}".format(connection))
         self._poll.unregister(connection.fd)
         self._descriptors.pop(connection.fd)
         connection.disconnect(exception)
@@ -61,7 +63,7 @@ class Reactor(object):
                 try:
                     self.tick()
                 except KeyboardInterrupt:
-                    print("\nShutting down...")
+                    self.log.warn("Disconnecting due to user interrupt")
                     break
         return self
 
@@ -75,7 +77,7 @@ class Reactor(object):
                 try:
                     for event in connection.read():
                         self.dispatch(event)
-                except Disconnected:
+                except igor.irc.connection.Disconnected:
                     self.disconnect(connection)
 
     def dispatch(self, event):
@@ -92,6 +94,8 @@ class Igor(Reactor):
 
     def __init__(self, config):
         self.config = config
-        connections = list(Connection(**c) for c in config['connections'])
-        callbacks = [Builtins()]
+        connections = [
+            igor.irc.connection.Connection(**c) for c in config['connections']]
+        callbacks = [
+            igor.plugins.builtins.Builtins()]
         super(Igor, self).__init__(connections, callbacks)

@@ -36,10 +36,10 @@ class Connection(object):
         BINARY_TYPE = str
         NEWLINE = str("\r\n")
 
-    def __init__(self, host, port=None, username=None, autojoin=None):
+    def __init__(self, host, port=None, name=None, autojoin=None):
         self.host = host
         self.port = port or 6667
-        self.username = username or 'igor'
+        self.name = name or 'igor'
         self.autojoin = autojoin or []
         self.reconnect_count = 0
 
@@ -47,8 +47,11 @@ class Connection(object):
         return quick_repr(self, {
             'host': self.host,
             'port': self.port,
-            'username': self.username
+            'name': self.name
         })
+
+    def __str__(self):
+        return "{self.name}@{self.host}:{self.port}".format(self=self)
 
     fd = ExceptionAttribute("File descriptor has not been set")
     socket = ExceptionAttribute("Socket has not been created")
@@ -62,7 +65,7 @@ class Connection(object):
 
         self.fd = self.socket.fileno()
 
-        self.nick(self.username)
+        self.nick(self.name)
         self.user('igor', 'Igor - https://github.com/borntyping/igor')
         self.join(*self.autojoin)
 
@@ -113,8 +116,8 @@ class Connection(object):
 
     # 4.1 - Connection Registration
 
-    def nick(self, nick):
-        self.write('NICK', [nick])
+    def nick(self, name):
+        self.write('NICK', [name])
 
     def user(self, user, real):
         self.write('USER', [user, "''", "''"], real)
