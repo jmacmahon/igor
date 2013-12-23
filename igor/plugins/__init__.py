@@ -5,6 +5,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 import functools
 import inspect
 import re
+import shlex
 import sys
 import traceback
 
@@ -52,7 +53,8 @@ def command(function):
     @functools.wraps(function)
     def wrapper(self, message):
         if message.trailing.startswith(':' + function.__name__):
-            return function(self, message, message.trailing.split())
+            argv = shlex.split(message.trailing)[1:]
+            return function(self, message, argv)
     return listen(wrapper, Privmsg)
 
 
