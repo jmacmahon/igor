@@ -8,7 +8,7 @@ import re
 import sys
 import traceback
 
-from igor.irc.messages import Message, Privmsg, MOTD
+from igor.irc.messages import Message, Privmsg
 
 __all__ = ['Plugin', 'listener', 'command', 'trigger']
 

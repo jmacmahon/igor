@@ -105,11 +105,6 @@ class Part(Message):
     channel = property(lambda self: self.parameters[0])
 
 
-@Message.register
-class Topic(Message):
-    channel = property(lambda self: self.parameters[0])
-
-
 # 4.4 Sending messages
 
 

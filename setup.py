@@ -6,14 +6,14 @@ import setuptools
 
 setuptools.setup(
     name = "igor",
-    version = "0.2.0",
+    version = "0.2.1",
     url = "https://github.com/borntyping/igor",
 
     author = "Sam Clements",
     author_email = "sam@borntyping.co.uk",
 
     description = "An IRC bot reanimated from various other bots",
-    long_description = open('README.md').read(),
+    long_description = open('README.rst').read(),
 
     packages = setuptools.find_packages(),
 

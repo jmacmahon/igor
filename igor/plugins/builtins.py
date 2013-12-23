@@ -2,8 +2,8 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-from igor.irc.messages import Privmsg, RPL_WELCOME
-from igor.plugins import Plugin, listen, listen_for, command, trigger
+from igor.irc.messages import RPL_WELCOME
+from igor.plugins import Plugin, listen, listen_for, command
 
 
 class Builtins(Plugin):
