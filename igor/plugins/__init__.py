@@ -14,10 +14,6 @@ __all__ = ['Plugin', 'listener', 'command', 'trigger']
 
 
 class Plugin(object):
-    @igor.utils.lazy
-    def log(self):
-        return igor.utils.getLogger(self)
-
     def _is_listener(self, obj):
         """Checks if the object has a receives attribute and is callable"""
         return hasattr(obj, 'receives') and callable(obj)
@@ -74,6 +70,9 @@ def trigger(pattern, flags=0, message_class=igor.irc.messages.Privmsg):
 
 
 class TestPlugin(Plugin):
+    def __init__(self):
+        self.log = igor.utils.getLogger(self)
+
     @listen
     def test_all(self, message):
         """Receives all messages"""

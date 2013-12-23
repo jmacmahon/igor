@@ -25,14 +25,3 @@ def getLogger(obj):
 def quick_repr(obj, attributes=None):
     attributes = ["{}={}".format(k, v) for k, v in attributes.items()]
     return fullname(obj) + '(' + ', '.join(attributes) + ')'
-
-
-class lazy(object):
-    """Decorates a function, turning it into a lazily-accessed property"""
-
-    def __init__(self, func):
-        self.func = func
-
-    def __get__(self, instance, owner):
-        setattr(instance, self.func.__name__, self.func(instance))
-        return getattr(instance, self.func.__name__)

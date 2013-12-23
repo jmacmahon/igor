@@ -4,16 +4,20 @@ from __future__ import absolute_import, unicode_literals
 
 from igor.irc.messages import RPL_WELCOME
 from igor.plugins import Plugin, listen, listen_for, command
+from igor.utils import getLogger
 
 
 class Builtins(Plugin):
+    def __init__(self):
+        self.log = getLogger(self)
+
     @listen
     def log_messages(self, message):
         self.log.debug(message)
 
     @listen_for(RPL_WELCOME)
     def welcome(self, message):
-        self.log.info("Connected to {0}".format(message.connection))
+        self.log.info(message.trailing)
 
     @command
     def say(self, message, argv):
