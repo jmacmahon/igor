@@ -128,7 +128,7 @@ class Connection(object):
         self.write('JOIN', [channel, key] if key else [channel])
 
     def part(self, channel):
-        self.write('PART', channel)
+        self.write('PART', [channel])
 
     # 4.4 Sending messages
 

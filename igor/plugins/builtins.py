@@ -17,8 +17,16 @@ class Builtins(Plugin):
 
     @command
     def say(self, message, argv):
-        message.reply(' '.join(argv[1:]))
+        message.reply(' '.join(argv))
+
+    @command
+    def join(self, message, argv):
+        message.connection.join(*argv)
+
+    @command
+    def part(self, message, argv):
+        message.connection.part(*argv)
 
     @command
     def quit(self, message, argv):
-        message.connection.quit(' '.join(argv[1:]))
+        message.connection.quit(' '.join(argv))
