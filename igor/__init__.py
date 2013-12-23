@@ -5,7 +5,11 @@ from __future__ import absolute_import, unicode_literals
 import argparse
 import logging
 
-from igor.reactor import Igor
+import yaml
+
+import igor.irc.connection
+import igor.reactor
+import igor.manager
 
 __version__ = '1.0.0-alpha'
 
@@ -50,5 +54,18 @@ parser.add_argument(
 
 def main():
     args = parser.parse_args()
+
     configure_logging(args.log_level)
-    Igor.from_config_file(args.config).go()
+
+    with open(args.config, 'r') as f:
+        config = yaml.safe_load(f)
+
+    manager = igor.manager.Manager()
+    manager.load_plugins(config.get('plugins', {
+        'Builtins': {'module': 'igor.plugins.builtins'}
+    }))
+
+    reactor = igor.reactor.Reactor(callback=manager)
+    reactor.load_connections(config.get('connections', list()))
+
+    reactor.go()

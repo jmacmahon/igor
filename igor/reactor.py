@@ -4,8 +4,6 @@ from __future__ import absolute_import, unicode_literals
 
 import select
 
-import yaml
-
 import igor.irc.connection
 import igor.plugins.builtins
 import igor.utils
@@ -18,13 +16,13 @@ class Reactor(object):
     _input_mask = select.POLLPRI | select.POLLIN
     _error_mask = select.POLLERR | select.POLLHUP | select.POLLNVAL
 
-    def __init__(self, connections, callbacks):
+    def __init__(self, callback, connections=None):
         self.log = igor.utils.getLogger(self)
         self.log.info("Igor raises from the grave!")
 
-        self.connections = connections
-        self.callbacks = callbacks
+        self.callback = callback
 
+        self.connections = connections or list()
         self._poll = select.poll()
         self._descriptors = dict()
 
@@ -37,6 +35,10 @@ class Reactor(object):
         """Disconnect from each connection"""
         for connection in list(self._descriptors.values()):
             self.disconnect(connection)
+
+    def load_connections(self, connections):
+        for conf in connections:
+            self.connections.append(igor.irc.connection.Connection(**conf))
 
     def connect(self, connection):
         self.log.info("Connecting to {0}".format(connection))
@@ -76,26 +78,6 @@ class Reactor(object):
             elif event & self._input_mask:
                 try:
                     for event in connection.read():
-                        self.dispatch(event)
+                        self.callback(event)
                 except igor.irc.connection.Disconnected:
                     self.disconnect(connection)
-
-    def dispatch(self, event):
-        for callback in self.callbacks:
-            callback(event)
-
-
-class Igor(Reactor):
-    @classmethod
-    def from_config_file(cls, filename):
-        with open(filename, 'r') as f:
-            config = yaml.safe_load(f)
-        return cls(config)
-
-    def __init__(self, config):
-        self.config = config
-        connections = [
-            igor.irc.connection.Connection(**c) for c in config['connections']]
-        callbacks = [
-            igor.plugins.builtins.Builtins()]
-        super(Igor, self).__init__(connections, callbacks)

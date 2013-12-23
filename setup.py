@@ -6,7 +6,7 @@ import setuptools
 
 setuptools.setup(
     name = "igor",
-    version = "0.3.1",
+    version = "0.4.0",
     url = "https://github.com/borntyping/igor",
 
     author = "Sam Clements",
